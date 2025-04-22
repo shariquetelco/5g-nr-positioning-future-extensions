@@ -60,4 +60,83 @@ Because the ```gNB``` program uses a Linux kernel driver for generating dummy NR
 In order to allow programs to open the corresponding virtual device files after loading the driver (see: ```/dev/5g/...```) and ```udev(1)``` is installed, then a corresponding udev rule has to be set. Further instructions can be found [here](https://gitlab.uni-rostock.de/ed2328/5g-positioning-from-scratch-nrppa-over-ngap/-/blob/main/src/kernel/ecid_params/README.md).
 
 ## Execution on command line
-The initialization system ```init5g``` can be used. Otherwise, the provided programs can also be executed manually on command line. For this purpose, three different terminals should be opened.
+The initialization system ```init5g``` can be used. Otherwise, the provided programs can also be executed manually on command line. For this purpose, three different terminals should be opened in parallel (ensure that the order of execution matches!). Then, the 5G positioning system can be started by, e.g. exploring the NRPPa NR-ECID Measurement procedure (on-demand):
+```
+Terminal-1-$ sudo ./lmfd 2 4
+Terminal-2-$ sudo ./amfd ue_ctx-2.csv 4
+Terminal-3-$ sudo ./gnb 4
+``` 
+where the NRPPa NR E-CID Measurement Request procedure with on-demand characteristics is executed for 2 virtuell UEs (internal IDs are located in ```ue_ctx-2.csv```) and a thread pool size of 4.
+
+Please, take into account that ```gnb``` expects the UE context file ```src/ue_ctx-256.csv``` in the ```/etc/init5g/amf/``` directory.
+
+If the NRPPa NR-ECID Measurement Report procedure should be invoked, then ```lmfd``` has to be executed with a third command line parameter that specifies the period. The range of the period is set to:
+```
+NRPPa_MeasurementPeriodicity_ms120 => 0
+NRPPa_MeasurementPeriodicity_ms240 => 1
+NRPPa_MeasurementPeriodicity_ms480 => 2
+NRPPa_MeasurementPeriodicity_ms640 => 3
+NRPPa_MeasurementPeriodicity_ms1024 => 4
+NRPPa_MeasurementPeriodicity_ms2048 => 5
+NRPPa_MeasurementPeriodicity_ms5120 => 6
+NRPPa_MeasurementPeriodicity_ms10240 => 7
+NRPPa_MeasurementPeriodicity_min1 => 8
+NRPPa_MeasurementPeriodicity_min6 => 9
+NRPPa_MeasurementPeriodicity_min12 => 10
+NRPPa_MeasurementPeriodicity_min30 => 11
+NRPPa_MeasurementPeriodicity_min60 => 12
+NRPPa_MeasurementPeriodicity_ms20480 => 13
+NRPPa_MeasurementPeriodicity_ms40960 => 14
+```
+
+## NRPPa: Time measurement investigation
+In order to store the time measurement values, the expected target directory has to be created:
+```$ mkdir -p /etc/init5g/lmf```. Then, ```amfd``` has to map the virtual UE context(s) to the connected ```gNB``` instance (**currently, only one gNB implementation at the same time has been tested!**). This means that the virtual UEs are handled by a ```gnb``` in parallel. To realize this mapping, the POSIX-compliant ```SIGUSR1```signal has to be sent to the AMF by using, e.g. ```kill(1)``` in a fourth terminal:
+1. Find out the process ID (PID) of amfd:
+```
+Terminal-4-$ pstree -p | grep amfd
+```
+2. Send SIGUSR1 to ```amfd```: 
+```
+Terminal-4-$ sudo kill -s SIGUSR1 <PID> 
+
+```
+Finally, the execution of the selected NRPPa procedure can be triggered by sending the ```SIGUSR2``` signal to ```amfd```:
+
+3. Send SIGUSR2 to ```amfd```: 
+```
+Terminal-4-$ sudo kill -s SIGUSR2 <PID> 
+
+```
+If the described steps are successfully completed, the following output is expected:
+- LMF:
+```
+[LMF] Started with: 2 (UEs), 2 (thread pool size)
+[LMF-sbi] HTTP/2 server is starting on 127.0.3.1:54321 ...
+```
+- AMF:
+```
+[AMF] Started with: ue_ctx-2.csv (UE context list), 4 (thread pool size)
+[AMF-n2] SCTP server is starting on 192.168.2.223:38412
+[AMF-sbi] HTTP/2 server is starting on 127.0.2.1:54321 ...
+
+[AMF-n2] gNB (ubuntu) accepted from 192.168.2.223!
+[AMF-n2] Added gNB reference to 2 UE context entries
+[AMF] -- Assignment of 1 gNB to 2 UE contexts successfully finished --
+[AMF-sbi] -- Starting positioning service for 2/2 UEs --
+[AMF-sbi] -- Finished positioning service for 2 UEs --
+```
+
+- gNB:
+```
+[gNB] Started with: 4 (thread pool size)
+[gNB] 256 UE context entries were successfully mapped to NGAP ID list
+[gNB-n2] Number of SCTP streams: 256 (in), 256 (out)
+[gNB-n2] -- NGAP: NG Setup procedure successfully completed --
+```
+
+The contents of a possible NRPPa measurement result file (e.g. ```etc/init5g/lmf/res_ecid_2_4_imsi-001010353241601.csv``` for UE with IMSI 001010353241601, 2 UE in parallel using 4 threads) should look like:
+```
+11670113740291,11670174331100,60590809
+```
+with t_start, t_end, t_diff in nanoseconds.
