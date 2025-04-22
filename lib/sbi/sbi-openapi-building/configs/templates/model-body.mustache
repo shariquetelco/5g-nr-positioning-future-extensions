@@ -1,0 +1,1134 @@
+{{#models}}{{#model}}
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "{{classname}}.h"
+
+{{#isEnum}}
+char* {{classname}}_ToString({{classVarName}}_e {{classname}})
+{
+    const char *{{classname}}Array[] =  { "NULL"{{#allowableValues}}{{#values}}, "{{.}}"{{/values}}{{/allowableValues}} };
+    size_t sizeofArray = sizeof({{classname}}Array) / sizeof({{classname}}Array[0]);
+    if ({{classname}} < sizeofArray)
+        return (char *){{classname}}Array[{{classname}}];
+    else
+        return (char *)"Unknown";
+}
+
+{{classVarName}}_e {{classname}}_FromString(char* {{classname}})
+{
+    int stringToReturn = 0;
+    const char *{{classname}}Array[] =  { "NULL"{{#allowableValues}}{{#values}}, "{{.}}"{{/values}}{{/allowableValues}} };
+    size_t sizeofArray = sizeof({{classname}}Array) / sizeof({{classname}}Array[0]);
+    while (stringToReturn < sizeofArray) {
+        if (strcmp({{classname}}, {{classname}}Array[stringToReturn]) == 0) {
+            return stringToReturn;
+        }
+        stringToReturn++;
+    }
+    return 0;
+}
+{{/isEnum}}
+{{^isEnum}}
+{{#vars}}
+    {{^isContainer}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+char *{{name}}{{classname}}_ToString({{classVarName}}_{{name}}_e {{name}})
+{
+    const char *{{name}}Array[] =  { "NULL"{{#allowableValues}}{{#values}}, "{{.}}"{{/values}}{{/allowableValues}} };
+    size_t sizeofArray = sizeof({{name}}Array) / sizeof({{name}}Array[0]);
+    if ({{name}} < sizeofArray)
+        return (char *){{name}}Array[{{name}}];
+    else
+        return (char *)"Unknown";
+}
+
+{{classVarName}}_{{name}}_e {{name}}{{classname}}_FromString(char* {{name}})
+{
+    int stringToReturn = 0;
+    const char *{{name}}Array[] =  { "NULL"{{#allowableValues}}{{#values}}, "{{.}}"{{/values}}{{/allowableValues}} };
+    size_t sizeofArray = sizeof({{name}}Array) / sizeof({{name}}Array[0]);
+    while (stringToReturn < sizeofArray) {
+        if (strcmp({{name}}, {{name}}Array[stringToReturn]) == 0) {
+            return stringToReturn;
+        }
+        stringToReturn++;
+    }
+    return 0;
+}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+{{/vars}}
+{{classname}}_t *{{classname}}_create(
+{{#vars}}
+    {{#isNullable}}
+    bool is_{{name}}_null,
+    {{/isNullable}}
+    {{^isContainer}}
+        {{^isPrimitiveType}}
+            {{#isEnum}}
+    {{datatype}}_e {{name}}{{^-last}},{{/-last}}
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isModel}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isUuid}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+                    {{/isUuid}}
+                    {{#isEmail}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+                    {{/isEmail}}
+                    {{#isFreeFormObject}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+    {{classVarName}}_{{name}}_e {{name}}{{^-last}},{{/-last}}
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isString}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+                {{/isString}}
+                {{#isByteArray}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+                {{/isByteArray}}
+                {{#isNumeric}}
+                    {{^required}}
+    bool is_{{name}},
+                    {{/required}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+                {{/isNumeric}}
+                {{#isBoolean}}
+                    {{^required}}
+    bool is_{{name}},
+                    {{/required}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+                {{/isBoolean}}
+            {{/isEnum}}
+            {{#isBinary}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+            {{/isBinary}}
+            {{#isDate}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+            {{/isDate}}
+            {{#isDateTime}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+            {{/isDateTime}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+        {{/isArray}}
+        {{#isMap}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+        {{/isMap}}
+    {{/isContainer}}
+{{/vars}})
+{
+    {{classname}}_t *{{classname}}_local_var = malloc(sizeof({{classname}}_t));
+
+{{#vars}}
+    {{#isNullable}}
+    {{classname}}_local_var->is_{{{name}}}_null = is_{{{name}}}_null;
+    {{/isNullable}}
+    {{^isContainer}}
+        {{#isPrimitiveType}}
+            {{^isEnum}}
+                {{#isNumeric}}
+                    {{^required}}
+    {{classname}}_local_var->is_{{{name}}} = is_{{{name}}};
+                    {{/required}}
+                {{/isNumeric}}
+                {{#isBoolean}}
+                    {{^required}}
+    {{classname}}_local_var->is_{{{name}}} = is_{{{name}}};
+                    {{/required}}
+                {{/isBoolean}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{classname}}_local_var->{{{name}}} = {{{name}}};
+{{/vars}}
+
+    return {{classname}}_local_var;
+}
+
+void {{classname}}_free({{classname}}_t *{{classname}})
+{
+    lnode_t *node = NULL;
+
+    if (NULL == {{classname}}) {
+        return;
+    }
+{{#vars}}
+    {{^isContainer}}
+        {{^isPrimitiveType}}
+            {{^isEnum}}
+                {{#isModel}}
+    if ({{{classname}}}->{{{name}}}) {
+        {{{complexType}}}_free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isUuid}}
+    if ({{{classname}}}->{{{name}}}) {
+        free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+                    {{/isUuid}}
+                    {{#isEmail}}
+    if ({{{classname}}}->{{{name}}}) {
+        free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+                    {{/isEmail}}
+                    {{#isFreeFormObject}}
+    if ({{{classname}}}->{{{name}}}) {
+        {{{datatype}}}_free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    if ({{{classname}}}->{{{name}}}) {
+        {{{datatype}}}_free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+        {{#isPrimitiveType}}
+            {{^isEnum}}
+                {{#isString}}
+    if ({{{classname}}}->{{{name}}}) {
+        free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+                {{/isString}}
+                {{#isByteArray}}
+    if ({{{classname}}}->{{{name}}}) {
+        free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+                {{/isByteArray}}
+            {{/isEnum}}
+            {{#isBinary}}
+    if ({{{classname}}}->{{{name}}}) {
+        free({{{classname}}}->{{{name}}}->data);
+        {{classname}}->{{name}} = NULL;
+    }
+            {{/isBinary}}
+            {{#isDate}}
+    if ({{{classname}}}->{{{name}}}) {
+        free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+            {{/isDate}}
+            {{#isDateTime}}
+    if ({{{classname}}}->{{{name}}}) {
+        free({{{classname}}}->{{{name}}});
+        {{classname}}->{{name}} = NULL;
+    }
+            {{/isDateTime}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+    if ({{{classname}}}->{{{name}}}) {
+            {{^isEnum}}
+        list_for_each({{classname}}->{{name}}, node) {
+                {{#isPrimitiveType}}
+            free(node->data);
+                {{/isPrimitiveType}}
+                {{^isPrimitiveType}}
+            {{complexType}}_free(node->data);
+                {{/isPrimitiveType}}
+        }
+            {{/isEnum}}
+        list_free({{classname}}->{{name}});
+        {{classname}}->{{name}} = NULL;
+    }
+        {{/isArray}}
+        {{#isMap}}
+    if ({{{classname}}}->{{{name}}}) {
+        list_for_each({{classname}}->{{name}}, node) {
+            map_t *localKeyValue = (map_t*)node->data;
+            free(localKeyValue->key);
+            {{^isEnum}}
+                {{#isPrimitiveType}}
+            free(localKeyValue->value);
+                {{/isPrimitiveType}}
+                {{^isPrimitiveType}}
+            {{complexType}}_free(localKeyValue->value);
+                {{/isPrimitiveType}}
+            {{/isEnum}}
+            map_free(localKeyValue);
+        }
+        list_free({{classname}}->{{name}});
+        {{classname}}->{{name}} = NULL;
+    }
+        {{/isMap}}
+    {{/isContainer}}
+{{/vars}}
+    free({{classname}});
+}
+
+cJSON *{{classname}}_convertToJSON({{classname}}_t *{{classname}})
+{
+    cJSON *item = NULL;
+    lnode_t *node = NULL;
+
+    if ({{classname}} == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        return NULL;
+    }
+
+    item = cJSON_CreateObject();
+{{#vars}}
+    {{#required}}
+        {{^isEnum}}
+            {{^isNumeric}}
+            {{^isBoolean}}
+    if (!{{{classname}}}->{{{name}}}) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        return NULL;
+    }
+            {{/isBoolean}}
+            {{/isNumeric}}
+        {{/isEnum}}
+        {{#isEnum}}
+            {{#isPrimitiveType}}
+    if ({{{classname}}}->{{{name}}} == {{classVarName}}_{{enumName}}_NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        return NULL;
+    }
+            {{/isPrimitiveType}}
+            {{^isPrimitiveType}}
+    if ({{{classname}}}->{{{name}}} == {{{complexType}}}_NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        return NULL;
+    }
+            {{/isPrimitiveType}}
+        {{/isEnum}}
+    {{/required}}
+    {{^required}}
+        {{^isEnum}}
+            {{#isNumeric}}
+    if ({{{classname}}}->is_{{{name}}}) {
+            {{/isNumeric}}
+            {{#isBoolean}}
+    if ({{{classname}}}->is_{{{name}}}) {
+            {{/isBoolean}}
+            {{^isNumeric}}
+            {{^isBoolean}}
+    if ({{{classname}}}->{{{name}}}) {
+            {{/isBoolean}}
+            {{/isNumeric}}
+        {{/isEnum}}
+        {{#isEnum}}
+            {{#isPrimitiveType}}
+    if ({{{classname}}}->{{{name}}} != {{classVarName}}_{{enumName}}_NULL) {
+            {{/isPrimitiveType}}
+            {{^isPrimitiveType}}
+    if ({{{classname}}}->{{{name}}} != {{{complexType}}}_NULL) {
+            {{/isPrimitiveType}}
+        {{/isEnum}}
+    {{/required}}
+    {{^isContainer}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{name}}}{{classname}}_ToString({{{classname}}}->{{{name}}})) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isString}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isString}}
+                {{#isByteArray}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isByteArray}}
+                {{#isNumeric}}
+    if (cJSON_AddNumberToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isNumeric}}
+                {{#isBoolean}}
+    if (cJSON_AddBoolToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isBoolean}}
+            {{/isEnum}}
+            {{#isBinary}}
+    char* encoded_str_{{{name}}} = base64encode({{{classname}}}->{{{name}}}->data,{{{classname}}}->{{{name}}}->len);
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", encoded_str_{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    free(encoded_str_{{{name}}});
+            {{/isBinary}}
+            {{#isDate}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+            {{/isDate}}
+            {{#isDateTime}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+            {{/isDateTime}}
+        {{/isPrimitiveType}}
+        {{^isPrimitiveType}}
+            {{#isEnum}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{complexType}}}_ToString({{{classname}}}->{{{name}}})) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isModel}}
+    cJSON *{{{name}}}_local_JSON = {{complexType}}{{#isFreeFormObject}}object{{/isFreeFormObject}}_convertToJSON({{{classname}}}->{{{name}}});
+    if ({{{name}}}_local_JSON == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    cJSON_AddItemToObject(item, "{{{baseName}}}", {{{name}}}_local_JSON);
+    if (item->child == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isUuid}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                    {{/isUuid}}
+                    {{#isEmail}}
+    if (cJSON_AddStringToObject(item, "{{{baseName}}}", {{{classname}}}->{{{name}}}) == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                    {{/isEmail}}
+                    {{#isFreeFormObject}}
+    cJSON *{{{name}}}_object = object_convertToJSON({{{classname}}}->{{{name}}});
+    if ({{{name}}}_object == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    cJSON_AddItemToObject(item, "{{{baseName}}}", {{{name}}}_object);
+    if (item->child == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    cJSON *{{{name}}}_object = any_type_convertToJSON({{{classname}}}->{{{name}}});
+    if ({{{name}}}_object == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    cJSON_AddItemToObject(item, "{{{baseName}}}", {{{name}}}_object);
+    if (item->child == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+    cJSON *{{{name}}}List = cJSON_AddArrayToObject(item, "{{{baseName}}}");
+    if ({{{name}}}List == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    list_for_each({{classname}}->{{{name}}}, node) {
+            {{#isEnum}}
+        if (cJSON_AddStringToObject({{{name}}}List, "", {{{complexType}}}_ToString((intptr_t)node->data)) == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#items}}
+                    {{#isPrimitiveType}}
+                        {{#isString}}
+        if (cJSON_AddStringToObject({{{name}}}List, "", (char*)node->data) == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+                        {{/isString}}
+                        {{#isByteArray}}
+        if (cJSON_AddStringToObject({{{name}}}List, "", (char*)node->data) == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+                        {{/isByteArray}}
+                        {{#isNumeric}}
+        if (node->data == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+        if (cJSON_AddNumberToObject({{{name}}}List, "", *(double *)node->data) == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+                        {{/isNumeric}}
+                        {{#isBoolean}}
+        if (cJSON_AddBoolToObject({{{name}}}List, "", (uintptr_t)node->data) == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+                        {{/isBoolean}}
+                    {{/isPrimitiveType}}
+                    {{^isPrimitiveType}}
+        cJSON *itemLocal = {{complexType}}_convertToJSON(node->data);
+        if (itemLocal == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+        cJSON_AddItemToArray({{{name}}}List, itemLocal);
+                    {{/isPrimitiveType}}
+                {{/items}}
+            {{/isEnum}}
+    }
+        {{/isArray}}
+        {{#isMap}}
+    cJSON *{{{name}}} = cJSON_AddObjectToObject(item, "{{{baseName}}}");
+    if ({{{name}}} == NULL) {
+        printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    cJSON *localMapObject = {{{name}}};
+    if ({{{classname}}}->{{{name}}}) {
+        list_for_each({{{classname}}}->{{{name}}}, node) {
+            map_t *localKeyValue = (map_t*)node->data;
+            if (localKeyValue == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            if (localKeyValue->key == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            {{#isEnum}}
+            if (cJSON_AddStringToObject(localMapObject, localKeyValue->key, {{{complexType}}}_ToString((intptr_t)localKeyValue->value)) == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#items}}
+                    {{#isPrimitiveType}}
+                        {{#isString}}
+            if (cJSON_AddStringToObject(localMapObject, localKeyValue->key, (char*)localKeyValue->value) == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+                        {{/isString}}
+                        {{#isByteArray}}
+            if(cJSON_AddStringToObject(localMapObject, localKeyValue->key, (char*)localKeyValue->value) == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+                        {{/isByteArray}}
+                        {{#isNumeric}}
+            if (localKeyValue->value == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            if (cJSON_AddNumberToObject(localMapObject, localKeyValue->key, *(double *)localKeyValue->value) == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+                        {{/isNumeric}}
+                        {{#isBoolean}}
+            if (cJSON_AddBoolToObject(localMapObject, localKeyValue->key, (uintptr_t)localKeyValue->value) == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+                        {{/isBoolean}}
+                    {{/isPrimitiveType}}
+                    {{^isPrimitiveType}}
+            cJSON *itemLocal = localKeyValue->value ?
+                {{complexType}}_convertToJSON(localKeyValue->value) :
+                cJSON_CreateNull();
+            if (itemLocal == NULL) {
+                printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            cJSON_AddItemToObject(localMapObject, localKeyValue->key, itemLocal);
+                    {{/isPrimitiveType}}
+                {{/items}}
+            {{/isEnum}}
+        }
+    }
+        {{/isMap}}
+    {{/isContainer}}
+    {{^required}}
+    {{#isNullable}}
+    } else if ({{{classname}}}->is_{{{name}}}_null) {
+        if (cJSON_AddNullToObject(item, "{{{baseName}}}") == NULL) {
+            printf("{{classname}}_convertToJSON() failed [{{{name}}}]");
+            goto end;
+        }
+    {{/isNullable}}
+    }
+    {{/required}}
+
+{{/vars}}
+end:
+    return item;
+}
+
+{{classname}}_t *{{classname}}_parseFromJSON(cJSON *{{classname}}JSON)
+{
+    {{classname}}_t *{{classname}}_local_var = NULL;
+    lnode_t *node = NULL;
+{{#vars}}
+    cJSON *{{{name}}} = NULL;
+    {{^isContainer}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+    {{classVarName}}_{{name}}_e {{name}}Variable = 0;
+            {{/isEnum}}
+            {{#isBinary}}
+    binary_t *decoded_str_{{{name}}} = NULL;
+            {{/isBinary}}
+        {{/isPrimitiveType}}
+        {{^isPrimitiveType}}
+            {{#isEnum}}
+    {{complexType}}_e {{name}}Variable = 0;
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isModel}}
+    {{^isFreeFormObject}}{{complexType}}{{/isFreeFormObject}}{{#isFreeFormObject}}object{{/isFreeFormObject}}_t *{{name}}_local_nonprim = NULL;
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isFreeFormObject}}
+    object_t *{{name}}_local_object = NULL;
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    any_type_t *{{name}}_local_object = NULL;
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+    list_t *{{{name}}}List = NULL;
+        {{/isArray}}
+        {{#isMap}}
+    list_t *{{{name}}}List = NULL;
+        {{/isMap}}
+    {{/isContainer}}
+{{/vars}}
+{{#vars}}
+    {{{name}}} = cJSON_GetObjectItemCaseSensitive({{classname}}JSON, "{{{baseName}}}");
+    {{#required}}
+    if (!{{{name}}}) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    {{/required}}
+    {{^required}}
+    if ({{{name}}}) {
+        {{#isNullable}}
+    if (!cJSON_IsNull({{{name}}})) {
+        {{/isNullable}}
+    {{/required}}
+    {{^isContainer}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+    if (!cJSON_IsString({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    {{name}}Variable = {{name}}{{classname}}_FromString({{{name}}}->valuestring);
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isString}}
+    if (!cJSON_IsString({{{name}}}){{^required}} && !cJSON_IsNull({{{name}}}){{/required}}) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isString}}
+                {{#isByteArray}}
+    if (!cJSON_IsString({{{name}}}){{^required}} && !cJSON_IsNull({{{name}}}){{/required}}) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isByteArray}}
+                {{#isNumeric}}
+    if (!cJSON_IsNumber({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isNumeric}}
+                {{#isBoolean}}
+    if (!cJSON_IsBool({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isBoolean}}
+            {{/isEnum}}
+            {{#isBinary}}
+    decoded_str_{{{name}}} = malloc(sizeof(binary_t));
+
+    if (!cJSON_IsString({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    decoded_str_{{{name}}}->data = base64decode({{{name}}}->valuestring, strlen({{{name}}}->valuestring), &decoded_str_{{{name}}}->len);
+    if (!decoded_str_{{{name}}}->data) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+            {{/isBinary}}
+            {{#isDate}}
+    if (!cJSON_IsString({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+            {{/isDate}}
+            {{#isDateTime}}
+    if (!cJSON_IsString({{{name}}}) && !cJSON_IsNull({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+            {{/isDateTime}}
+        {{/isPrimitiveType}}
+        {{^isPrimitiveType}}
+            {{#isEnum}}
+    if (!cJSON_IsString({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    {{name}}Variable = {{complexType}}_FromString({{{name}}}->valuestring);
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isModel}}
+    {{{name}}}_local_nonprim = {{complexType}}{{#isFreeFormObject}}object{{/isFreeFormObject}}_parseFromJSON({{{name}}});
+    if (!{{{name}}}_local_nonprim) {
+        printf("{{complexType}}{{#isFreeFormObject}}object{{/isFreeFormObject}}_parseFromJSON failed [{{{name}}}]");
+        goto end;
+    }
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isUuid}}
+    if (!cJSON_IsString({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                    {{/isUuid}}
+                    {{#isEmail}}
+    if (!cJSON_IsString({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+                    {{/isEmail}}
+                    {{#isFreeFormObject}}
+    if (!cJSON_IsObject({{{name}}})) {
+        printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+        goto end;
+    }
+    {{{name}}}_local_object = object_parseFromJSON({{{name}}});
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    {{{name}}}_local_object = any_type_parseFromJSON({{{name}}});
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+        cJSON *{{{name}}}_local = NULL;
+        if (!cJSON_IsArray({{{name}}})) {
+            printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+            goto end;
+        }
+
+        {{{name}}}List = list_create();
+
+        cJSON_ArrayForEach({{{name}}}_local, {{{name}}}) {
+            {{#isEnum}}
+            {{{complexType}}}_e localEnum = {{{complexType}}}_NULL;
+            if (!cJSON_IsString({{{name}}}_local)) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            localEnum = {{{complexType}}}_FromString({{{name}}}_local->valuestring);
+            if (!localEnum) {
+                printf("Enum value \"%s\" for field \"{{{name}}}\" is not supported. Ignoring it ...",
+                         {{{name}}}_local->valuestring);
+            } else {
+                list_add({{{name}}}List, (void *)localEnum);
+            }
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isPrimitiveType}}
+            double *localDouble = NULL;
+            int *localInt = NULL;
+                {{/isPrimitiveType}}
+                {{#items}}
+                    {{#isPrimitiveType}}
+                        {{#isString}}
+            if (!cJSON_IsString({{{name}}}_local)) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            list_add({{{name}}}List, strdup({{{name}}}_local->valuestring));
+                        {{/isString}}
+                        {{#isByteArray}}
+            if (!cJSON_IsString({{{name}}}_local)) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            list_add({{{name}}}List, strdup({{{name}}}_local->valuestring));
+                        {{/isByteArray}}
+                        {{#isNumeric}}
+            if (!cJSON_IsNumber({{{name}}}_local)) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            localDouble = (double *)calloc(1, sizeof(double));
+            if (!localDouble) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            *localDouble = {{{name}}}_local->valuedouble;
+            list_add({{{name}}}List, localDouble);
+                        {{/isNumeric}}
+                        {{#isBoolean}}
+            if (!cJSON_IsBool({{{name}}}_local)) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            localInt = (int *)calloc(1, sizeof(int));
+            if (!localInt) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            *localInt = {{{name}}}_local->valueint;
+            list_add({{{name}}}List, localInt);
+                        {{/isBoolean}}
+                    {{/isPrimitiveType}}
+                    {{^isPrimitiveType}}
+            if (!cJSON_IsObject({{{name}}}_local)) {
+                printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                goto end;
+            }
+            {{complexType}}_t *{{{name}}}Item = {{complexType}}_parseFromJSON({{{name}}}_local);
+            if (!{{{name}}}Item) {
+                printf("No {{{name}}}Item");
+                goto end;
+            }
+            list_add({{{name}}}List, {{{name}}}Item);
+                    {{/isPrimitiveType}}
+                {{/items}}
+            {{/isEnum}}
+        }
+        {{#isEnum}}
+        if ({{{name}}}List->count == 0) {
+            printf("{{classname}}_parseFromJSON() failed: Expected {{{name}}}List to not be empty (after ignoring unsupported enum values).");
+            goto end;
+        }
+        {{/isEnum}}
+        {{/isArray}}
+        {{#isMap}}
+        cJSON *{{{name}}}_local_map = NULL;
+        if (!cJSON_IsObject({{{name}}}) && !cJSON_IsNull({{{name}}})) {
+            printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+            goto end;
+        }
+        if (cJSON_IsObject({{{name}}})) {
+            {{{name}}}List = list_create();
+            map_t *localMapKeyPair = NULL;
+            cJSON_ArrayForEach({{{name}}}_local_map, {{{name}}}) {
+                cJSON *localMapObject = {{{name}}}_local_map;
+            {{#isEnum}}
+                if (!cJSON_IsString(localMapObject)) {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                localMapKeyPair = map_create(strdup(localMapObject->string), (void *){{{complexType}}}_FromString(localMapObject->string));
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isPrimitiveType}}
+                double *localDouble = NULL;
+                int *localInt = NULL;
+                {{/isPrimitiveType}}
+                {{#items}}
+                    {{#isPrimitiveType}}
+                        {{#isString}}
+                if (!cJSON_IsString(localMapObject)) {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                localMapKeyPair = map_create(strdup(localMapObject->string), strdup(localMapObject->valuestring));
+                        {{/isString}}
+                        {{#isByteArray}}
+                if (!cJSON_IsString(localMapObject)) {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                localMapKeyPair = map_create(strdup(localMapObject->string), strdup(localMapObject->valuestring));
+                        {{/isByteArray}}
+                        {{#isNumeric}}
+                if (!cJSON_IsNumber(localMapObject)) {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                localDouble = (double *)calloc(1, sizeof(double));
+                if (!localDouble) {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                *localDouble = localMapObject->valuedouble;
+                localMapKeyPair = map_create(strdup(localMapObject->string), localDouble);
+                        {{/isNumeric}}
+                        {{#isBoolean}}
+                if (!cJSON_IsBool(localMapObject)) {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                localInt = (int *)calloc(1, sizeof(int));
+                if (!localInt) {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                *localInt = localMapObject->valueint;
+                localMapKeyPair = map_create(strdup(localMapObject->string), localInt);
+                        {{/isBoolean}}
+                    {{/isPrimitiveType}}
+                    {{^isPrimitiveType}}
+                if (cJSON_IsObject(localMapObject)) {
+                    localMapKeyPair = map_create(
+                        strdup(localMapObject->string), {{complexType}}_parseFromJSON(localMapObject));
+                } else if (cJSON_IsNull(localMapObject)) {
+                    localMapKeyPair = map_create(strdup(localMapObject->string), NULL);
+                } else {
+                    printf("{{classname}}_parseFromJSON() failed [{{{name}}}]");
+                    goto end;
+                }
+                    {{/isPrimitiveType}}
+                {{/items}}
+            {{/isEnum}}
+                list_add({{{name}}}List, localMapKeyPair);
+            }
+        }
+        {{/isMap}}
+    {{/isContainer}}
+    {{^required}}
+    }
+        {{#isNullable}}
+    }
+        {{/isNullable}}
+    {{/required}}
+
+{{/vars}}
+    {{classname}}_local_var = {{classname}}_create (
+{{#vars}}
+    {{#isNullable}}
+        {{{name}}} && cJSON_IsNull({{{name}}}) ? true : false,
+    {{/isNullable}}
+    {{^isContainer}}
+        {{^isPrimitiveType}}
+            {{#isEnum}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}Variable{{^required}} : 0{{/required}}{{^-last}},{{/-last}}
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isModel}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}_local_nonprim{{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isUuid}}
+        {{^required}}{{{name}}} ? {{/required}}strdup({{{name}}}->valuestring){{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+                    {{/isUuid}}
+                    {{#isEmail}}
+        {{^required}}{{{name}}} ? {{/required}}strdup({{{name}}}->valuestring){{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+                    {{/isEmail}}
+                    {{#isFreeFormObject}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}_local_object{{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}_local_object{{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+        {{^required}}{{{name}}} ? {{/required}}{{name}}Variable{{^required}} : 0{{/required}}{{^-last}},{{/-last}}
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isNumeric}}
+        {{^required}}{{{name}}} ? true : false,{{/required}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}->valuedouble{{^required}} : 0{{/required}}{{^-last}},{{/-last}}
+                {{/isNumeric}}
+                {{#isBoolean}}
+        {{^required}}{{{name}}} ? true : false,{{/required}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}->valueint{{^required}} : 0{{/required}}{{^-last}},{{/-last}}
+                {{/isBoolean}}
+                {{#isString}}
+        {{^required}}{{{name}}} && !cJSON_IsNull({{{name}}}) ? {{/required}}strdup({{{name}}}->valuestring){{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+                {{/isString}}
+                {{#isByteArray}}
+        {{^required}}{{{name}}} && !cJSON_IsNull({{{name}}}) ? {{/required}}strdup({{{name}}}->valuestring){{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+                {{/isByteArray}}
+            {{/isEnum}}
+            {{#isBinary}}
+        {{^required}}{{{name}}} ? {{/required}}decoded_str_{{{name}}}{{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+            {{/isBinary}}
+            {{#isDate}}
+        {{^required}}{{{name}}} ? {{/required}}strdup({{{name}}}->valuestring){{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+            {{/isDate}}
+            {{#isDateTime}}
+        {{^required}}{{{name}}} && !cJSON_IsNull({{{name}}}) ? {{/required}}strdup({{{name}}}->valuestring){{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+            {{/isDateTime}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}List{{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+        {{/isArray}}
+        {{#isMap}}
+        {{^required}}{{{name}}} ? {{/required}}{{{name}}}List{{^required}} : NULL{{/required}}{{^-last}},{{/-last}}
+        {{/isMap}}
+    {{/isContainer}}
+{{/vars}}
+    );
+
+    return {{classname}}_local_var;
+end:
+{{#vars}}
+    {{^isContainer}}
+        {{^isPrimitiveType}}
+            {{^isEnum}}
+                {{#isModel}}
+    if ({{{name}}}_local_nonprim) {
+        {{{complexType}}}_free({{{name}}}_local_nonprim);
+        {{{name}}}_local_nonprim = NULL;
+    }
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isFreeFormObject}}
+    if ({{{name}}}_local_object) {
+        {{{datatype}}}_free({{{name}}}_local_object);
+        {{{name}}}_local_object = NULL;
+    }
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    if ({{name}}_local_object) {
+        {{{datatype}}}_free({{name}}_local_object);
+        {{name}}_local_object = NULL;
+    }
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+    if ({{{name}}}List) {
+            {{^isEnum}}
+        list_for_each({{{name}}}List, node) {
+                {{#isPrimitiveType}}
+            free(node->data);
+                {{/isPrimitiveType}}
+                {{^isPrimitiveType}}
+            {{complexType}}_free(node->data);
+                {{/isPrimitiveType}}
+        }
+            {{/isEnum}}
+        list_free({{{name}}}List);
+        {{{name}}}List = NULL;
+    }
+        {{/isArray}}
+        {{#isMap}}
+    if ({{{name}}}List) {
+        list_for_each({{{name}}}List, node) {
+            map_t *localKeyValue = (map_t*) node->data;
+            free(localKeyValue->key);
+            {{^isEnum}}
+                {{#isPrimitiveType}}
+            free(localKeyValue->value);
+                {{/isPrimitiveType}}
+                {{^isPrimitiveType}}
+            {{complexType}}_free(localKeyValue->value);
+                {{/isPrimitiveType}}
+            {{/isEnum}}
+            map_free(localKeyValue);
+        }
+        list_free({{{name}}}List);
+        {{{name}}}List = NULL;
+    }
+        {{/isMap}}
+    {{/isContainer}}
+{{/vars}}
+    return NULL;
+}
+
+{{classname}}_t *{{classname}}_copy({{classname}}_t *dst, {{classname}}_t *src)
+{
+    cJSON *item = NULL;
+    char *content = NULL;
+
+    item = {{classname}}_convertToJSON(src);
+    if (!item) {
+        printf("{{classname}}_convertToJSON() failed");
+        return NULL;
+    }
+
+    content = cJSON_Print(item);
+    cJSON_Delete(item);
+
+    if (!content) {
+        printf("cJSON_Print() failed");
+        return NULL;
+    }
+
+    item = cJSON_Parse(content);
+    free(content);
+    if (!item) {
+        printf("cJSON_Parse() failed");
+        return NULL;
+    }
+
+    {{classname}}_free(dst);
+    dst = {{classname}}_parseFromJSON(item);
+    cJSON_Delete(item);
+
+    return dst;
+}
+{{/isEnum}}
+{{/model}}{{/models}}

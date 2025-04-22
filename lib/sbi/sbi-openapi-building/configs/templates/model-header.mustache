@@ -1,0 +1,210 @@
+{{#models}}{{#model}}/*
+ * {{classname}}.h
+ *
+ * {{description}}
+ */
+
+#ifndef _{{classname}}_H_
+#define _{{classname}}_H_
+
+#include <string.h>
+#include "../external/cJSON.h"
+#include "../include/list.h"
+#include "../include/keyValuePair.h"
+#include "../include/binary.h"
+{{#imports}}
+#include "{{{.}}}.h"
+{{/imports}}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+{{#isEnum}}
+    {{#allowableValues}}
+typedef enum { {{classVarName}}_NULL = 0{{#enumVars}}, {{classVarName}}_{{{value}}}{{/enumVars}} } {{classVarName}}_e;
+    {{/allowableValues}}
+
+char* {{classname}}_ToString({{classVarName}}_e {{classname}});
+
+{{classVarName}}_e {{classname}}_FromString(char* {{classname}});
+{{/isEnum}}
+{{^isEnum}}
+typedef struct {{classname}}_s {{classname}}_t;
+{{#vars}}
+    {{^isContainer}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+                {{#allowableValues}}
+typedef enum { {{classVarName}}_{{enumName}}_NULL = 0{{#enumVars}}, {{classVarName}}_{{enumName}}_{{{value}}}{{/enumVars}} } {{classVarName}}_{{name}}_e;
+                {{/allowableValues}}
+
+char* {{classVarName}}_{{name}}_ToString({{classVarName}}_{{name}}_e {{name}});
+
+{{classVarName}}_{{name}}_e {{classVarName}}_{{name}}_FromString(char* {{name}});
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+{{/vars}}
+typedef struct {{classname}}_s {
+{{#vars}}
+    {{#isNullable}}
+    bool is_{{name}}_null;
+    {{/isNullable}}
+    {{^isContainer}}
+        {{^isPrimitiveType}}
+            {{#isEnum}}
+    {{datatype}}_e {{name}};
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isModel}}
+    struct {{datatype}}_s *{{name}};
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isUuid}}
+    {{datatype}} *{{name}};
+                    {{/isUuid}}
+                    {{#isEmail}}
+    {{datatype}} *{{name}};
+                    {{/isEmail}}
+                    {{#isFreeFormObject}}
+    {{datatype}}_t *{{name}};
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    {{datatype}}_t *{{name}};
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+    {{classVarName}}_{{name}}_e {{name}};
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isNumeric}}
+                    {{^required}}
+    bool is_{{name}};
+                    {{/required}}
+    {{datatype}} {{name}};
+                {{/isNumeric}}
+                {{#isBoolean}}
+                    {{^required}}
+    bool is_{{name}};
+                    {{/required}}
+    {{datatype}} {{name}};
+                {{/isBoolean}}
+                {{#isString}}
+    {{datatype}} *{{name}};
+                {{/isString}}
+            {{/isEnum}}
+            {{#isByteArray}}
+    {{datatype}} *{{name}};
+            {{/isByteArray}}
+            {{#isBinary}}
+    {{datatype}} {{name}};
+            {{/isBinary}}
+            {{#isDate}}
+    {{datatype}} *{{name}};
+            {{/isDate}}
+            {{#isDateTime}}
+    {{datatype}} *{{name}};
+            {{/isDateTime}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+    {{datatype}}_t *{{name}};
+        {{/isArray}}
+        {{#isMap}}
+    {{datatype}} {{name}};
+        {{/isMap}}
+    {{/isContainer}}
+{{/vars}}
+} {{classname}}_t;
+
+{{classname}}_t *{{classname}}_create(
+{{#vars}}
+    {{#isNullable}}
+    bool is_{{name}}_null,
+    {{/isNullable}}
+    {{^isContainer}}
+        {{^isPrimitiveType}}
+            {{#isEnum}}
+    {{datatype}}_e {{name}}{{^-last}},{{/-last}}
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isModel}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+                {{/isModel}}
+                {{^isModel}}
+                    {{#isUuid}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+                    {{/isUuid}}
+                    {{#isEmail}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+                    {{/isEmail}}
+                    {{#isFreeFormObject}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+                    {{/isFreeFormObject}}
+                    {{#isAnyType}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+                    {{/isAnyType}}
+                {{/isModel}}
+            {{/isEnum}}
+        {{/isPrimitiveType}}
+        {{#isPrimitiveType}}
+            {{#isEnum}}
+    {{classVarName}}_{{name}}_e {{name}}{{^-last}},{{/-last}}
+            {{/isEnum}}
+            {{^isEnum}}
+                {{#isNumeric}}
+                    {{^required}}
+    bool is_{{name}},
+                    {{/required}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+                {{/isNumeric}}
+                {{#isBoolean}}
+                    {{^required}}
+    bool is_{{name}},
+                    {{/required}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+                {{/isBoolean}}
+                {{#isString}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+                {{/isString}}
+            {{/isEnum}}
+            {{#isByteArray}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+            {{/isByteArray}}
+            {{#isBinary}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+            {{/isBinary}}
+            {{#isDate}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+            {{/isDate}}
+            {{#isDateTime}}
+    {{datatype}} *{{name}}{{^-last}},{{/-last}}
+            {{/isDateTime}}
+        {{/isPrimitiveType}}
+    {{/isContainer}}
+    {{#isContainer}}
+        {{#isArray}}
+    {{datatype}}_t *{{name}}{{^-last}},{{/-last}}
+        {{/isArray}}
+        {{#isMap}}
+    {{datatype}} {{name}}{{^-last}},{{/-last}}
+        {{/isMap}}
+    {{/isContainer}}
+{{/vars}});
+void {{classname}}_free({{classname}}_t *{{classname}});
+{{classname}}_t *{{classname}}_parseFromJSON(cJSON *{{classname}}JSON);
+cJSON *{{classname}}_convertToJSON({{classname}}_t *{{classname}});
+{{classname}}_t *{{classname}}_copy({{classname}}_t *dst, {{classname}}_t *src);
+{{/isEnum}}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _{{classname}}_H_ */
+{{/model}}{{/models}}

@@ -1,0 +1,105 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "gad_shape.h"
+
+gad_shape_t *gad_shape_create(supported_gad_shapes_e shape) {
+	gad_shape_t *gad_shape_local_var = malloc(sizeof(gad_shape_t));
+
+	gad_shape_local_var->shape = shape;
+
+	return gad_shape_local_var;
+}
+
+void gad_shape_free(gad_shape_t *gad_shape) {
+	lnode_t *node = NULL;
+
+	if(NULL == gad_shape) {
+		return;
+	}
+	free(gad_shape);
+}
+
+cJSON *gad_shape_convertToJSON(gad_shape_t *gad_shape) {
+	cJSON *item = NULL;
+	lnode_t *node = NULL;
+
+	if(gad_shape == NULL) {
+		printf("gad_shape_convertToJSON() failed [GADShape]");
+		return NULL;
+	}
+
+	item = cJSON_CreateObject();
+	if(gad_shape->shape == supported_gad_shapes_NULL) {
+		printf("gad_shape_convertToJSON() failed [shape]");
+		return NULL;
+	}
+	if(cJSON_AddStringToObject(item, "shape",
+	                           supported_gad_shapes_ToString(gad_shape->
+	                                                         shape)) ==
+	   NULL)
+	{
+		printf("gad_shape_convertToJSON() failed [shape]");
+		goto end;
+	}
+
+end:
+	return item;
+}
+
+gad_shape_t *gad_shape_parseFromJSON(cJSON *gad_shapeJSON) {
+	gad_shape_t *gad_shape_local_var = NULL;
+	lnode_t *node = NULL;
+	cJSON *shape = NULL;
+	supported_gad_shapes_e shapeVariable = 0;
+	shape = cJSON_GetObjectItemCaseSensitive(gad_shapeJSON, "shape");
+	if(!shape) {
+		printf("gad_shape_parseFromJSON() failed [shape]");
+		goto end;
+	}
+	if(!cJSON_IsString(shape)) {
+		printf("gad_shape_parseFromJSON() failed [shape]");
+		goto end;
+	}
+	shapeVariable = supported_gad_shapes_FromString(shape->valuestring);
+
+	gad_shape_local_var = gad_shape_create(
+		shapeVariable
+		);
+
+	return gad_shape_local_var;
+end:
+	return NULL;
+}
+
+gad_shape_t *gad_shape_copy(gad_shape_t *dst, gad_shape_t *src) {
+	cJSON *item = NULL;
+	char *content = NULL;
+
+	item = gad_shape_convertToJSON(src);
+	if(!item) {
+		printf("gad_shape_convertToJSON() failed");
+		return NULL;
+	}
+
+	content = cJSON_Print(item);
+	cJSON_Delete(item);
+
+	if(!content) {
+		printf("cJSON_Print() failed");
+		return NULL;
+	}
+
+	item = cJSON_Parse(content);
+	free(content);
+	if(!item) {
+		printf("cJSON_Parse() failed");
+		return NULL;
+	}
+
+	gad_shape_free(dst);
+	dst = gad_shape_parseFromJSON(item);
+	cJSON_Delete(item);
+
+	return dst;
+}

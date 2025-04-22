@@ -1,0 +1,11 @@
+# point_uncertainty_circle_all_of_t
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**point** | [**geographical_coordinates_t**](geographical_coordinates.md) \* |  | 
+**uncertainty** | **float** | Indicates value of uncertainty. | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

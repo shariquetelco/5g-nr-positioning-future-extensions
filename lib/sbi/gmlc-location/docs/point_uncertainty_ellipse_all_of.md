@@ -1,0 +1,12 @@
+# point_uncertainty_ellipse_all_of_t
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**point** | [**geographical_coordinates_t**](geographical_coordinates.md) \* |  | 
+**uncertainty_ellipse** | [**uncertainty_ellipse_t**](uncertainty_ellipse.md) \* |  | 
+**confidence** | **int** | Indicates value of confidence. | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

@@ -1,0 +1,1 @@
+SUBSYSTEM=="nr_ecid", GROUP="dialout", MODE="0440"
