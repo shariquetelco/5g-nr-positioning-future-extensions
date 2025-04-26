@@ -1,7 +1,6 @@
 # 5G NR Positioning and Future Extensions (Rebuild)
 
 This project rebuilds and extends an open 5G NR positioning simulation, focused on NRPPa over NGAP communication, and incorporates future development concepts for robust wireless localization.
-It is inspired by foundational work from Nico Kalis (original repo and dataset credited below).
 
 We reconstruct and modernize the project for easier extensibility, research-grade experiments, and integration with real-world datasets.
 
