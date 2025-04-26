@@ -27,8 +27,6 @@ It enables simulation and research on:
 This project uses real 5G positioning data from [Zenodo Record #15261338](https://zenodo.org/records/15261338), originally created by **Nico Kalis**.
 The dataset has been organized under the `/datasets` directory for easy access.
 
-👉 **Full Credit:** Nico Kalis, University of Rostock (Original Data Creator)
-
 ---
 
 ## 🚀 Features
