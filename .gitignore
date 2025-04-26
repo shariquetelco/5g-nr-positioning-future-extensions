@@ -1,0 +1,41 @@
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Ignore virtual environments
+env/
+venv/
+
+# VSCode editor settings
+.vscode/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore log files
+*.log
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore dataset folders if needed (optional)
+datasets/
+
+# Ignore embedded rootfs (Optional: if you want)
+embedded/
+
+# Ignore compiled files
+*.o
+*.ko
+*.ko.xz
+*.mod
+
+# Ignore backup files
+*~
+*.bak
