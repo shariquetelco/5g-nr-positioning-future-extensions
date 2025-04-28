@@ -6,7 +6,11 @@ It is inspired by foundational work from Nico Kalis (original repo and dataset c
 We reconstruct and modernize the project for easier extensibility, research-grade experiments, and integration with real-world datasets.
 
 ---
-
+## ✨  Project Highlights
+- Full simulation of NR-PPa and NGAP signaling flow.
+- Reproducible experiments with real-world-like network parameters.
+- Lightweight and easy-to-extend Python modules.
+- Integration with authentic datasets to verify positioning accuracy.
 ## 📡 Project Overview
 
 The goal of this repository is to provide a modular and ready-to-use simulation platform for:
@@ -26,8 +30,6 @@ It enables simulation and research on:
 
 This project uses real 5G positioning data from [Zenodo Record #15261338](https://zenodo.org/records/15261338), originally created by **Nico Kalis**.
 The dataset has been organized under the `/datasets` directory for easy access.
-
-👉 **Full Credit:** Nico Kalis, University of Rostock (Original Data Creator)
 
 ---
 
@@ -64,3 +66,10 @@ The next evolution steps planned:
    ```bash
    git clone https://github.com/shariquetelco/5g-nr-positioning-future-extensions.git
    cd 5g-nr-positioning-future-extensions
+   pip install -r requirements.txt
+   python main.py
+
+-----
+
+## 📜 License
+This project is distributed under the MIT License. Please check LICENSE for more details.
